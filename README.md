@@ -1,4 +1,4 @@
-# Raspberry-Pi-v3-Tweaker [![Build Status](https://travis-ci.org/cbusuioceanu/Raspberry-Pi-v3-Tweaker.svg?branch=master)](https://travis-ci.org/cbusuioceanu/Raspberry-Pi-v3-Tweaker)
+# Raspberry Pi v3 Tweaker [![Build Status](https://travis-ci.org/cbusuioceanu/Raspberry-Pi-v3-Tweaker.svg?branch=master)](https://travis-ci.org/cbusuioceanu/Raspberry-Pi-v3-Tweaker)
 View Raspberry Pi 3 CPU Info - Clock speed - Temperatures - Voltage - Overclock you RPi - Change Governor &amp; more
 
 #### Smart Raspberry Pi 3 CPU Tweaker is a script written exclusively on a Raspberry Pi 3 device.
