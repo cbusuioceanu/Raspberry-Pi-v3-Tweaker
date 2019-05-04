@@ -2,7 +2,7 @@
 
 # Built on 9th Mars 2016
 # By Constantin Busuioceanu
-# Smart_Raspiv3CPUtweak - for Raspberry Pi 3
+# RPiv3Tweak - for Raspberry Pi 3
 # View Raspberry Pi 3 CPU Info - Clock speed - Temperatures - Voltage - Overclock you RPi - Change Governor & more
 # Run script with sudo raspiv3cputweak.sh
 #
@@ -35,153 +35,156 @@ WHITEbg=$(tput setab 7 && tput bold)
 STAND=$(tput sgr0)
 
 ### System dialog VARS
-showinfo="$GREEN[info]$STAND"
-showerror="$RED[error]$STAND"
-showexecute="$YELLOW[running]$STAND"
-showok="$MAGENTA[OK]$STAND"
-showgrnok="$GREEN[OK]$STAND"
-showrqst="$CYAN[input]$STAND"
-showexpired="$REDbg$WHITE[EXPIRED]$STAND"
-showactive="$GREENbg$WHITE[ACTIVE]$STAND"
-showwarning="$RED[warning]$STAND"
-showremove="$GREEN[removing]$STAND"
-shownone="$MAGENTA[none]$STAND"
-redhashtag="$REDbg$WHITE#$STAND"
+show_info="$GREEN[info]$STAND"
+show_error="$RED[error]$STAND"
+show_execute="$YELLOW[running]$STAND"
+show_ok="$MAGENTA[OK]$STAND"
+show_input="$CYAN[input]$STAND"
+show_warning="$RED[warning]$STAND"
 ##
 
-version="01/30/2018"
+##
+export BLACK
+export RED
+export GREEN
+export YELLOW
+export BLUE
+export MAGENTA
+export CYAN
+export WHITE
+export BLACKbg
+export REDbg
+export GREENbg
+export YELLOWbg
+export BLUEbg
+export MAGENTAbg
+export CYANbg
+export WHITEbg
+export STAND
+export show_info
+export show_error
+export show_execute
+export show_ok
+export show_input
+export show_warning
+##
+
+version="05/04/2019"
 unixtime=$(date --date="$version" +"%s")
 time=$(date +"%T")
 
-### Resize current window
-function resizewindow(){
-echo "$showinfo Resizing window to$GREEN 24x90"$STAND
-resize -s 24 125 1> /dev/null
+#### pause function
+function pause(){
+	local message="$@"
+	[ -z $message ] && message="$show_info Press [Enter] key to continue..."
+	read -r -e -p "$message" readEnterKey
+}
+
+#### Dependencies check
+
+function checkdependencies(){
+
+	# -------------------------------------------
+	# Check for installed dependencies
+	# -------------------------------------------
+	if [[ -e /tmp/rpiv3tweak ]]; then
+		echo "$show_info Checking dependencies: $show_ok"
+	else
+		echo "dependencies_OK" > /tmp/rpiv3tweak
+		echo "$show_execute Checking dependencies..."
+
+		#### check if xterm installation exists
+		if which xterm > /dev/null; then
+			echo "$show_ok[xterm]:$WHITE installation found..."
+		else
+			echo "$showwarning: This script requires xterm to work"
+			echo "$show_execute Downloading from network..."
+			apt-get install -y xterm
+		fi
+		####
+
+		#### check if vcgencmd installation exists
+		if which vcgencmd > /dev/null; then
+			echo "$show_ok[vcgencmd]:$WHITE installation found..."
+		else
+			echo "$showwarning: This script requires vcgencmd to work"
+			echo "$show_execute Downloading from network..."
+			apt-get update && apt-get upgrade && apt-get dist-upgrade
+		fi
+		###
+			echo "$show_info All dependencies ok..."
+	fi
 }
 
 #### ROOT User Check
 function checkroot(){
 	if [[ $(id -u) = 0 ]];
 	then
-		echo -e "$showinfo Checking for ROOT:$GREEN PASSED"$STAND
+		echo -e "$show_info Checking for ROOT: $show_ok"
 	else
-		echo -e $WHITE" Checking for ROOT:$RED FAILED - This Script Needs To Run As$RED ROOT (sudo)\n" $STAND
-		echo -e $WHITE" Raspiv3CPUtweak will Exit.\n"$STAND
+		echo -e "$show_error Checking for ROOT:$RED FAILED - This Script Needs To Run As$RED ROOT (sudo)\n"
+		echo -e "$show_info Raspiv3CPUtweak will Exit.\n"
 		exit 0
 	fi
 }
-
-
-function sversion(){
-echo "$showinfo Script version:$GREEN $version"$STAND
-}
-
-#### pause function
-function pause(){
-	local message="$@"
-	[ -z $message ] && message=$STAND"Press [Enter] key to continue..."
-	read -e -p "$message" readEnterKey
-}
-
-#### Dependencies check
-
-function checkdependencies(){
-####################################################################################
-#                Path to installations			                           #
-####################################################################################
-findxterm="/lib/terminfo/x/xterm"    # installation path to xterm (for resize cmd) #
-findvcgencmd="/opt/vc/bin/vcgencmd" # installation path to xterm                   #
-####################################################################################
-
-	# -------------------------------------------
-	# Check for installed dependencies
-	# -------------------------------------------
-	if [ -a /tmp/smart_raspiv3cputweak ];
-	then
-		echo "$showexecute Checking dependencies: ${GREEN}PASSED"$STAND
-	else
-		echo "dependencies_OK" > /tmp/smart_raspiv3cputweak
-		echo "$showexecute Checking dependencies..."
-
-		#### check if xterm installation exists
-		if [ -e $findxterm ];
-		then
-			echo "$showok[xterm]:$WHITE installation found..."
-			apt-get install -y xterm > /dev/null
-		else
-			echo "$showwarning: This script requires xterm installed to work"
-			echo "$showexecute Downloading from network..."
-			sleep 2;
-			apt-get install -y xterm
-		fi
-			sleep 1;
-		####
-
-		#### check if vcgencmd installation exists
-		if [ -e $findvcgencmd ];
-		then
-			echo $BLUE"$showok[vcgencmd]:$WHITE installation found..."
-		else
-			echo "$showwarning: This script requires vcgencmd installed to work"
-			echo "$showexecute Downloading from network..."
-			sleep 2;
-			sudo apt-get update && sudo apt-get upgrade && sudo apt-get dist-upgrade
-		fi
-		sleep 1;
-		###
-			echo "$showinfo All dependencies ok..."
-	fi
-}
-resizewindow && checkroot && sversion && checkdependencies
 ###
 
+### Resize current window
+function resizewindow(){
+	echo "$show_info Resizing window to$GREEN 24x90 $STAND"
+	resize -s 24 125 1> /dev/null
+}
+###
+
+checkdependencies && checkroot && resizewindow
 
 ### Check Frequency, Temp, Voltage, Governor
 function freqtempvolt() {
 
-function mhz_convert() {
-    let value=$1/1000
-    echo "$value"
-}
+	function mhz_convert() {
+	    let value=$1/1000
+	    echo "$value"
+	}
 
-function overvoltdecimals() {
-    let overvolts=${1#*.}-20
-    echo "$overvolts"
-}
+	function overvoltdecimals() {
+	    let overvolts=${1#*.}-20
+	    echo "$overvolts"
+	}
 
-temp=$(vcgencmd measure_temp)
-temp=${temp:5:4}
+	temp=$(vcgencmd measure_temp)
+	temp=${temp:5:4}
 
-volts=$(vcgencmd measure_volts)
-volts=${volts:5:4}
+	volts=$(vcgencmd measure_volts)
+	volts=${volts:5:4}
 
-if [ $volts != "1.20" ]; then
-    overvolts=$(overvoltdecimals $volts)
-fi
+	if [[ $volts != "1.20" ]]; then
+	    overvolts=$(overvoltdecimals $volts)
+	fi
 
-### VARS
-minFreq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq)
-minFreq=$(mhz_convert $minFreq)
-maxFreq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq)
-maxFreq=$(mhz_convert $maxFreq)
-freq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)
-freq=$(mhz_convert $freq)
-governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
-transitionlatency=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_transition_latency)
-###
+	### VARS
+	minFreq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq)
+	minFreq=$(mhz_convert $minFreq)
+	maxFreq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq)
+	maxFreq=$(mhz_convert $maxFreq)
+	freq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)
+	freq=$(mhz_convert $freq)
+	governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+	transitionlatency=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_transition_latency)
+	###
 
-	if [ $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor) == ondemand ];
+	if [[ $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor) == ondemand ]];
 	then
 		### VARS
 		samplingrate=$(cat /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate)
-		#samplingratemin=$(cat /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate_min)
 		upthreshold=$(cat /sys/devices/system/cpu/cpufreq/ondemand/up_threshold)
 		###
 
-		echo -e "\n+------------------------------------+"
+		echo "+------------------------------+"
+		echo "|          CPU Details         |"
+		echo "+------------------------------+"
 		echo "Temperature:        $temp C"
 
-		if [ $volts == "1.20" ]; then
+		if [[ $volts == "1.20" ]]; then
 			echo "Voltage:            $volts V"
 		else
 			echo -n "Voltage:            $volts V"
@@ -195,12 +198,14 @@ transitionlatency=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_transition_
 		echo "Sampling rate:      $samplingrate"
 		echo "Up threshold:       $upthreshold"
 		echo "Transition latency: $transitionlatency"
-		echo "+------------------------------------+"
+		echo "+------------------------------+"
 	else
-		echo -e "\n+------------------------------------+"
+		echo "+------------------------------+"
+		echo "|          CPU Details         |"
+		echo "+------------------------------+"
 		echo "Temperature:        $temp C"
 
-		if [ $volts == "1.20" ]; then
+		if [[ $volts == "1.20" ]]; then
 			echo "Voltage:            $volts V"
 		else
 			echo -n "Voltage:            $volts V"
@@ -212,7 +217,7 @@ transitionlatency=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_transition_
 		echo "Current speed:      $freq MHz"
 		echo "Governor:           $governor"
 		echo "Transition latency: $transitionlatency"
-		echo "+------------------------------------+"
+		echo "+------------------------------+"
 	fi
 		pause
 }
@@ -226,37 +231,34 @@ available_governors=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available
 current_governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
 ###
 
-echo -e "\n$showinfo Current CPU governor is:$GREEN $current_governor"$STAND
-echo "$showinfo Affected cpus:$GREEN $affected_cpus"$STAND
-echo "$showinfo Available CPU governors:$RED $available_governors"$STAND
-echo "$showinfo If you'd like to abort, write abort then press enter."
-read -e -p "$showrqst Enter desired governor: " ch_governor
+echo -e "\n$show_info Current CPU governor is:$GREEN $current_governor $STAND"
+echo "$show_info Affected cpus:$GREEN $affected_cpus $STAND"
+echo "$show_info Available CPU governors:$RED $available_governors $STAND"
+echo "$show_info If you'd like to abort, write abort then press enter."
+read -r -e -p "$show_input Enter desired governor: " ch_governor
 
 if [[ $ch_governor == "abort" ]];
 then
-	echo "$showexecute Going back to main menu." && sleep 1
+	echo "$show_execute Going back to main menu." && sleep 1
 else
 	sudo sh -c "echo $ch_governor > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
-	echo -e "$showinfo Governor changed to:$RED $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)\n"$STAND
+	echo -e "$show_info Governor changed to:$RED $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)\n"$STAND
 
 	if [[ $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor) == ondemand ]];
 	then
 		echo "Ondemand governor set. You can change sampling_rate and up_threshold for better performance."
 		echo "Current sampling_rate=$GREEN $(cat /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate)"$STAND
-		#read -p "Enter new sampling_rate value: " sampling_rate
-		#sudo sh -c "echo $sampling_rate > /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate"
-		#echo "sampling_rate changed to:$RED $(cat /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate)"$STAND
 
 		echo "According to Kernel Documentation, sampling_rate should get adjusted considering the transition latency."
 		echo "The default model looks like this: cpuinfo_transition_latency * 1000 / 1000 = sampling_rate"
 
 		echo "The next operation will do this for you. For example, we can choose 750"
-		read -e -p "$showrqst Enter value: " sampling_rate_value
+		read -r -e -p "$show_input Enter value: " sampling_rate_value
 		sudo sh -c "echo $(($(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_transition_latency) * $sampling_rate_value / 1000)) > /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate"
 		echo "sampling_rate changed to:$RED $(cat /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate)"$STAND
 
 		echo -e "Current up_threshold=$GREEN $(cat /sys/devices/system/cpu/cpufreq/ondemand/up_threshold)\n"$STAND
-		read -e -p "$showrqst Enter new up_threshold value: " up_threshold
+		read -r -e -p "$show_input Enter new up_threshold value: " up_threshold
 		sudo sh -c "echo $up_threshold > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold"
 		echo -e "up_threshold changed to:$RED $(cat /sys/devices/system/cpu/cpufreq/ondemand/up_threshold)\n"$STAND
 		pause
@@ -268,72 +270,109 @@ fi
 
 ### Overclocking settings
 function rpioverclock() {
-clear
-read -e -p "$showrqst Write$GREEN overclock$STAND to continue or$RED abort$STAND to cancel: " oc_accept
+
+	read -r -e -p "$show_input Write$GREEN overclock$STAND to continue or$RED abort$STAND to cancel: " oc_accept
+
 	if [[ $oc_accept == overclock ]];
 	then
-		echo "Creating backup for config.txt in /boot"
-		echo "You will have an option to post-edit/review your config.txt and add personal settings before restarting."
+		echo "$show_execute Creating backup for config.txt in /boot"
+		echo "$show_info You will have an option to post-edit/review your config.txt and add personal settings before restarting."
 	sleep 1
-		sudo cp /boot/config.txt /boot/config.txt.raspicputweak-backup
-		sudo echo "hdmi_force_hotplug=1
-arm_freq=1400
-arm_freq_min=700
-core_freq=500
-sdram_freq=500
-over_voltage=6" > /boot/config.txt
+		sudo cp /boot/config.txt /boot/config.txt.rpiv3tweak_backup
+		echo "hdmi_force_hotplug=1 #set by RPiv3Tweak
+$(if grep -aq "Raspberry Pi 3 Model B Plus" /proc/device-tree/model; then echo "arm_freq=1500        #set by RPiv3Tweak"; else if grep -aq "Raspberry Pi 3 Model B" /proc/device-tree/model; then echo "arm_freq=1300        #set by RPiv3Tweak"; fi fi)
+core_freq=500        #set by RPiv3Tweak
+sdram_freq=500       #set by RPiv3Tweak
+over_voltage=6       #set by RPiv3Tweak
+boot_delay=1         #set by RPiv3Tweak" >> /boot/config.txt
 
-		echo "$showexecute Mods written."
-		echo "$showinfo Please review mods..." && sleep 1
-		sudo nano /boot/config.txt
-		echo -e "\nAll ok."
+		echo "$show_ok Mods written."
+		echo "$show_info Please review mods..." && sleep 1
+		nano /boot/config.txt
+		echo -e "\n$show_info All $show_ok"
 		pause
 	else
-		echo -e "\n$showinfo Going back to main menu." && sleep 1
-		#rpioverclock
+		echo -e "\n$show_info Going back to main menu." && sleep 1
 	fi
 }
-
-#### Raspiv3CPUtweak CHANGELOG
-function raspitweakchangelog(){
-### VARS
-checknet=$(ping -q -w 1 -c 1 google.com 2>&1 > /dev/null && echo Internet OK.)
 ###
-	if [[ "$checknet" == "Internet OK." ]];
-	then
+
+
+###
+function change_swap() {
+
+	get_current_swap=$(grep "CONF_SWAPSIZE=" /etc/dphys-swapfile | cut -d '=' -f2)
+	echo -e "\n::: SWAP SIZE CHANGE :::\n"
+
+	function swap_change() {
+
+		read -r -e -p "$show_input Would you like to change the SWAP size? (y or n): " read_swap_change
+
+		if [[ $read_swap_change == y ]]; then
+
+			read -r -e -p "$show_input Enter size (recommended size is 2 * current RAM size): " read_swap_size
+
+			if [[ $read_swap_size =~ ^[0-9][0-9][0-9][0-9]$ ]]; then
+
+				echo "$show_execute Setting SWAP size to ${GREEN}$read_swap_size"
+				if sed -i -- "s/CONF_SWAPSIZE=$get_current_swap/CONF_SWAPSIZE=$read_swap_size/g" /etc/dphys-swapfile; then echo "$show_info SWAP size changed successfully!"; else "$show_error Couldn't change SWAP size!"; fi
+				if dphys-swapfile swapoff; then echo "$show_execute Stopping SWAP...$show_ok"; else echo "$show_error Couldn't stop SWAP..."; fi
+				if dphys-swapfile setup; then echo "$show_execute Setting new SWAP...$show_ok"; else echo "$show_error Couldn't set up new SWAP..."; fi
+				if dphys-swapfile swapon; then echo "$show_execute Starting new SWAP...$show_ok"; else echo "$show_error Couldn't start new SWAP..."; fi
+			else
+				echo "$show_error Wrong size entered...try again"
+			fi
+
+		elif [[ $read_swap_change == n ]]; then
+
+			echo "$show_info We won't change SWAP.."
+
+		elif [[ $read_swap_change == * ]]; then
+
+			echo "$show_error Wrong option. Available options are y or n." && swap_change
+		fi
+	}
+	swap_change
+}
+###
+
+### Raspiv3CPUtweak CHANGELOG
+function raspitweakchangelog(){
+
 	### VARS
-	changelog=$(curl --silent --user-agent "SmartUniverseTechnologies - Smart_Raspiv3CPUtweak - smartuniversetech.ro" -q https://www.smartuniversetech.ro/linux-scripts/updates/smart_raspiv3cputweak/changelog.txt)
-	last_version=$(curl --silent --user-agent "SmartUniverseTechnologies - Smart_Raspiv3CPUtweak - smartuniversetech.ro" -q https://www.smartuniversetech.ro/linux-scripts/updates/smart_raspiv3cputweak/version.txt)
+	checknet=$(ping -q -w 1 -c 1 google.com 2>&1 > /dev/null && echo Internet OK.)
 	###
 
-		if [[ $last_version > $unixtime ]];
-		then
-			clear && echo -e $GREEN"\nChecking for update: $REDbg${WHITE}New version available!\n"$STAND
-			echo $YELLOW"Changelog:$MAGENTA
-$changelog" $STAND
-			echo -e $REDbg$WHITE"\nNew version available!\n"$STAND
-			echo $MAGENTAbg$WHITE"Get the latest version from https://www.smartuniversetech.ro"$STAND
+	if [[ "$checknet" == "Internet OK." ]]; then
+	### VARS
+	changelog=$(curl --silent --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36" -q https://raw.githubusercontent.com/cbusuioceanu/Raspberry-Pi-v3-Tweaker/master/changelog.txt)
+	last_version=$(curl --silent --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36" -q https://raw.githubusercontent.com/cbusuioceanu/Raspberry-Pi-v3-Tweaker/master/version.txt)
+	###
 
-			read -e -p "$showrqst Press y to open website or n to go to Main Menu." option
-			case $option in
-		  		y) xdg-open "https://www.smartuniversetech.ro/?s=raspberry pi v3 cpu tweak" 2> /dev/null && clear ;;
-				n) clear ;;
-     				*) echo " \"$option\" Is Not A Valid Option"; sleep 1; raspitweakchangelog ;;
-		    	esac
+		if [[ $last_version > $unixtime ]]; then
+			echo -e "\n$show_info Checking for update: $REDbg${WHITE}New version available!\n$STAND"
+			echo $YELLOW"Changelog:$MAGENTA
+$changelog $STAND"
+			function update() {
+				read -r -e -p "$show_input Press y to update now via update.sh script (y or n): " option
+				case $option in
+			  		y) bash update.sh;;
+					n) echo "$show_info Ok, we'll update later." ;;
+     					*) echo "$show_error $option is not a valid option..."; update ;;
+			    	esac
+			}
+			update
 		else
-			clear && echo -e $GREEN"\nChecking for update:$YELLOW You already have the latest version!" $STAND
-    			sleep 2 && clear
+			echo -e "\n$show_info Checking for update:$YELLOW You already have the latest version!"
 		fi
 	else
-		echo -e $STAND"\nNo Internet connection." && sleep 2
-		clear
+		echo -e "\n$showerror No Internet connection." && sleep 1
 	fi
 }
 
 #### Exit Raspiv3CPUtweak
-function exitcputweak () {
-  echo "Bye!"
-  exit 0
+function expit_tweaker () {
+  echo "Bye!" && exit 0
 }
 
 #### Infinite Loop To Show Menu Until Exit
@@ -342,26 +381,29 @@ function exitcputweak () {
 while :
 do
 echo $YELLOW"+-----------------------------------+"
-echo "|Raspberry Pi 3 CPU Tweaker         |
-|Script version: $version         |"
+echo "| Raspberry Pi 3 Tweaker            |
+| Script version: $version        |"
 echo "+-----------------------------------+"$STAND
 echo "+------------------------------+"
 echo "| 1. Show CPU details          |"
 echo "| 2. Change CPU Govenor        |"
 echo "| 3. ${RED}Overclock$STAND                 |"
-echo "| 4. Updates                   |"
-echo "| 5. EXIT                      |"
+echo "| 4. Change SWAP               |"
+echo "| 5. Updates                   |"
+echo "| 6. EXIT                      |"
 echo "+------------------------------+"
-read -e -p "$showrqst Choose an option: " menuoption
+read -r -e -p "$show_input Choose an option: " menuoption
 
 case $menuoption in
 1) freqtempvolt ;;
 2) changegovernor ;;
 3) rpioverclock ;;
-4) raspitweakchangelog ;;
-5) exitcputweak ;;
-*) echo "'$menuoption' Is not a valid option!" && sleep 1; clear ;;
+4) change_swap ;;
+5) raspitweakchangelog ;;
+6|q) expit_tweaker ;;
+*) echo "'$menuoption' Is not a valid option!" && sleep 1;;
 esac
 done
 
 #End
+
