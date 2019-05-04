@@ -1,1 +1,11 @@
-test
+09032016
+        - Initial version
+09032016
+        - Updated dependencies function
+16072017
+        - Code beautify
+        - Added Informational VARS
+        - Fixed error for sampling_rate_min VAR
+04052019
+        - Updated code
+        - Added SWAP change functionality
