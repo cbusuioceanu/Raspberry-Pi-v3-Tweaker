@@ -1,6 +1,10 @@
 # Raspberry Pi v3 Tweaker [![Build Status](https://travis-ci.org/cbusuioceanu/Raspberry-Pi-v3-Tweaker.svg?branch=master)](https://travis-ci.org/cbusuioceanu/Raspberry-Pi-v3-Tweaker)
 View Raspberry Pi 3 CPU Info - Clock speed - Temperatures - Voltage - Overclock you RPi - Change Governor &amp; more
 
+### How to use?
+
+```git clone https://github.com/cbusuioceanu/Raspberry-Pi-v3-Tweaker.git && cd Raspberry-Pi-v3-Tweaker && sudo bash rpiv3tweak.sh ```
+
 #### Smart Raspberry Pi 3 CPU Tweaker is a script written exclusively on a Raspberry Pi 3 device.
 
 #### In case of overclocking, we recommend using a Raspberry Pi cooling kit (heatsinks).
@@ -18,4 +22,5 @@ View Raspberry Pi 3 CPU Info - Clock speed - Temperatures - Voltage - Overclock 
 ##### -> Transition latency (CPU speed change is done in x nano seconds)
 ##### -> CPU governor change (governor: performance, powersave, userspace, ondemand, conservative)
 ##### -> Overclocking
+##### -> Change SWAP size
 ##### -> Check script updates from the main menu or update it from Git
