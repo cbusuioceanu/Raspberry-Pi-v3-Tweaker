@@ -9,3 +9,6 @@
 04052019
         - Updated code
         - Added SWAP change functionality
+25092020
+        - Code cleaned
+        - Small improvements
